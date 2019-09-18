@@ -23,7 +23,6 @@ public enum HttpStatus {
     HttpStatus(Integer id, String message) {
         this.id = id;
         this.message = message;
-        //teste
     }
 
     public Integer getId() {
@@ -61,5 +60,4 @@ public enum HttpStatus {
     public static HttpStatus getByMessage(String message) {
         return (lookup.containsValue(message)) ? lookup.get(message) : null;
     }
-
 }
