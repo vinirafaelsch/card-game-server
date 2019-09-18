@@ -23,6 +23,7 @@ public enum HttpStatus {
     HttpStatus(Integer id, String message) {
         this.id = id;
         this.message = message;
+        //teste
     }
 
     public Integer getId() {
