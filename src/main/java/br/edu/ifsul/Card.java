@@ -29,9 +29,9 @@ public enum Card {
 
     static {
         EnumSet.allOf(Card.class).forEach(
-                tipoAcesso -> lookup.put(
-                        tipoAcesso.getId(),
-                        tipoAcesso
+                card -> lookup.put(
+                        card.getId(),
+                        card
                 )
         );
     }

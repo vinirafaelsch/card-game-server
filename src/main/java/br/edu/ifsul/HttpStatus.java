@@ -38,9 +38,9 @@ public enum HttpStatus {
 
     static {
         EnumSet.allOf(HttpStatus.class).forEach(
-                tipoAcesso -> lookup.put(
-                        tipoAcesso.getId(),
-                        tipoAcesso
+                httpStatus -> lookup.put(
+                        httpStatus.getId(),
+                        httpStatus
                 )
         );
     }
