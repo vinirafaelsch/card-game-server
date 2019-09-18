@@ -97,7 +97,6 @@ public class Server {
                 operacao = protocolo[0];
                 switch (operacao) {
                     case "OI":
-                        //validando protocolo (parse)
                         try {
                             String nome = protocolo[1].split(":")[1];
 
