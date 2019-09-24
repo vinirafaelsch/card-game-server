@@ -1,141 +1,94 @@
 package br.edu.ifsul;
 
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import javax.swing.*;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+public class Server extends Thread {
 
-public class Server {
+    private Socket con;
+    private String nome;
+    private InputStream in;
+    private BufferedReader bfr;
+    private InputStreamReader inr;
+    private static ServerSocket server;
+    private static ArrayList<BufferedWriter> clientes;
 
-    private ServerSocket serverSocket;
-    int porta;
-
-    public Server() {
+    public Server(Socket con) {
+        this.con = con;
+        try {
+            in = con.getInputStream();
+            inr = new InputStreamReader(in);
+            bfr = new BufferedReader(inr);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-
-    public static void main(String[] args) {
-
+    /**
+     * Método run
+     */
+    public void run() {
         try {
-            Server server = new Server();
-            //1 - Criar o servidor de conexÃµes
+            String msg;
+            OutputStream ou = this.con.getOutputStream();
+            Writer ouw = new OutputStreamWriter(ou);
+            BufferedWriter bfw = new BufferedWriter(ouw);
+            clientes.add(bfw);
+            nome = msg = bfr.readLine();
 
-            ServerSocket serverSocket = server.criarServerSocket(5555);
-            //2 -Esperar o um pedido de conexÃ£o;
-            try {
-                do {
+            while (!"Sair".equalsIgnoreCase(msg) && msg != null) {
+                msg = bfr.readLine();
+                sendToAll(bfw, msg);
+                System.out.println(msg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-                    System.out.println("Esperando conexao...");
-                    Socket socket = server.esperaConexao(); //bloqueante
-                    //3 - Criar streams de enechar socket de comunicaÃ§Ã£o entre servidor/cliente
-                    trataConexão(socket);
-                    System.out.println("Conexão com cliente estabelecida.");
+    /***
+     * Método usado para enviar mensagem para todos os clients
+     */
+    public void sendToAll(BufferedWriter bwSaida, String msg) throws IOException {
+        BufferedWriter bwS;
 
-                } while (true);
-            } catch (Exception e) {
-                System.out.println("Erro no event loop do main(): " + e.getMessage());
-                serverSocket.close();
+        for (BufferedWriter bw : clientes) {
+            bwS = (BufferedWriter) bw;
+            if (!(bwSaida == bwS)) {
+                bw.write(nome + " -> " + msg + "\r\n");
+                bw.flush();
+            }
+        }
+    }
+
+    /**
+     * Método main
+     */
+    public static void main(String[] args) {
+        try {
+            // Cria os objetos necessário para instânciar o servidor
+            JLabel lblMessage = new JLabel("Porta do Servidor:");
+            JTextField txtPorta = new JTextField("12345");
+            Object[] texts = {lblMessage, txtPorta};
+            JOptionPane.showMessageDialog(null, texts);
+            server = new ServerSocket(Integer.parseInt(txtPorta.getText()));
+            clientes = new ArrayList<>();
+            JOptionPane.showMessageDialog(null, "Servidor ativo na porta: " +
+                    txtPorta.getText());
+
+            while (true) {
+                System.out.println("Aguardando conexão...");
+                Socket con = server.accept();
+                System.out.println("Cliente conectado...");
+                Thread t = new Server(con);
+                t.start();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            //System.out.println("Erro na main do ServerSocket " + e.);
-            System.exit(0);
-        }
-    }
-
-    private ServerSocket criarServerSocket(int porta) {
-        try {
-            this.serverSocket = new ServerSocket(porta);
-        } catch (Exception e) {
-            System.out.println("Erro na Criação do server Socket " + e.getMessage());
-        }
-
-        return serverSocket;
-    }
-
-    private Socket esperaConexao() {
-        try {
-            return this.serverSocket.accept();
-        } catch (IOException ex) {
-            System.out.println("Erro ao criar socket do cliente " + ex.getMessage());
-            return null;
-        }
-    }
-
-    private static void trataConexão(Socket socket) {
-        //tratamento da comunicação com um cliente (socket)
-        ObjectOutputStream output = null;
-        ObjectInputStream input = null;
-
-
-        try {
-            output = new ObjectOutputStream(socket.getOutputStream());
-            input = new ObjectInputStream(socket.getInputStream());
-            output.flush();
-            System.out.println("Conexao recebida, inciando protocolo...");
-            //iniciar a conversa --- SINCRONO
-            String msgResposta = "";
-            String operacao = "";
-
-            boolean primeira = true;
-            //event loop
-            do {
-                //leitura
-                String msgCliente = input.readUTF(); //bloqueante
-                String response = "";
-                System.out.println("Mensagem recebida do cliente: " + msgCliente);
-                //escrita
-
-                String[] protocolo = msgCliente.split(";");
-                operacao = protocolo[0];
-                switch (operacao) {
-                    case "OI":
-                        try {
-                            String nome = protocolo[1].split(":")[1];
-
-                            //escrevendo a resposta
-                            if (nome == null) {
-                                //faltou um parâmetro
-                                response += "OIRESPONSE";
-                                response += "\n400";
-                            } else {
-                                response += "OIREPONSE";
-                                response += "\n200";
-                                response += "\nmensagem:Olá, " + nome + "!";
-                            }
-                        } catch (Exception e) {
-                            response += "OIRESPONSE";
-                            response += "\n400";
-                        }
-                        break;
-                    default:
-                        //mensagem inválida
-                        response += operacao.toUpperCase() + "RESPONSE";
-                        response += "\n400";
-                        System.out.println("Parando comunicacao com cliente " + socket.getInetAddress());
-                        break;
-                }
-                //enviar a resposta ao cliente
-                output.writeUTF(response);
-                output.flush();
-            } while (!operacao.equals("pare"));
-        } catch (Exception e) {
-            System.out.println("Erro no loop de tratamento do cliente: " + socket.getInetAddress().getHostAddress());
-        } finally {
-            try {
-                //fechar as conexões
-                output.close();
-                input.close();
-            } catch (IOException ex) {
-                System.out.println("Erro normal ao fechar conexão do cliente..." + ex.getMessage());
-            }
         }
     }
 }
