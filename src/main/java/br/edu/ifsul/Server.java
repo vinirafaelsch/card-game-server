@@ -15,8 +15,11 @@ public class Server extends Thread {
     private InputStreamReader inr;
     private static ServerSocket server;
     private static ArrayList<BufferedWriter> clientes;
+//    ObjectOutputStream
 
     public Server(Socket con) {
+//        ObjectOutputStream objectOutputStream = new ObjectOutputStream(con.getOutputStream());
+//        objectOutputStream.writeUTF();
         this.con = con;
         try {
             in = con.getInputStream();
@@ -42,22 +45,18 @@ public class Server extends Thread {
             while (!"Sair".equalsIgnoreCase(msg) && msg != null) {
                 msg = bfr.readLine();
                 sendToAll(bfw, msg);
-                System.out.println(msg);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    /***
+    /**
      * Método usado para enviar mensagem para todos os clients
      */
     public void sendToAll(BufferedWriter bwSaida, String msg) throws IOException {
-        BufferedWriter bwS;
-
         for (BufferedWriter bw : clientes) {
-            bwS = (BufferedWriter) bw;
-            if (!(bwSaida == bwS)) {
+            if (!(bwSaida == bw)) {
                 bw.write(nome + " -> " + msg + "\r\n");
                 bw.flush();
             }
@@ -69,15 +68,10 @@ public class Server extends Thread {
      */
     public static void main(String[] args) {
         try {
-            // Cria os objetos necessário para instânciar o servidor
-            JLabel lblMessage = new JLabel("Porta do Servidor:");
-            JTextField txtPorta = new JTextField("12345");
-            Object[] texts = {lblMessage, txtPorta};
-            JOptionPane.showMessageDialog(null, texts);
-            server = new ServerSocket(Integer.parseInt(txtPorta.getText()));
+            Integer porta = 25565;
+
+            server = new ServerSocket(porta);
             clientes = new ArrayList<>();
-            JOptionPane.showMessageDialog(null, "Servidor ativo na porta: " +
-                    txtPorta.getText());
 
             while (true) {
                 System.out.println("Aguardando conexão...");
@@ -86,7 +80,6 @@ public class Server extends Thread {
                 Thread t = new Server(con);
                 t.start();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
