@@ -3,7 +3,6 @@ package br.edu.ifsul;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -18,11 +17,8 @@ public class Server extends Thread {
     private InputStreamReader inr;
     private static ServerSocket server;
     private static ArrayList<BufferedWriter> clientes;
-//    ObjectOutputStream
 
     public Server(Socket con) {
-//        ObjectOutputStream objectOutputStream = new ObjectOutputStream(con.getOutputStream());
-//        objectOutputStream.writeUTF();
         this.con = con;
         try {
             in = con.getInputStream();
@@ -44,13 +40,15 @@ public class Server extends Thread {
             BufferedWriter bfw = new BufferedWriter(ouw);
             clientes.add(bfw);
 
-            try {
-                JSONObject jsonObject = new JSONObject(bfr.readLine());
-                nome = jsonObject.getString("nome");
-                msg = jsonObject.getString("msg");
-            } catch (JSONException err) {
-                err.printStackTrace();
-            }
+            nome = msg = bfr.readLine();
+
+//            try {
+//                String jsonString = bfr.readLine();
+//                JSONObject jsonObject = new JSONObject(jsonString); ///bfr
+//                nome = jsonObject.getString("nome");
+//            } catch (JSONException err) {
+//                err.printStackTrace();
+//            }
 
             while (!"Sair".equalsIgnoreCase(msg) && msg != null) {
                 msg = bfr.readLine();
@@ -83,9 +81,8 @@ public class Server extends Thread {
     public static void main(String[] args) {
         try {
             Integer porta = 25565;
-
-            server = new ServerSocket(porta);
             clientes = new ArrayList<>();
+            server = new ServerSocket(porta);
 
             while (true) {
                 System.out.println("Aguardando conexão...");

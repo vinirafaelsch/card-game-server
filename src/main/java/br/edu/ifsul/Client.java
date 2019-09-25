@@ -33,7 +33,7 @@ public class Client extends JFrame implements ActionListener, KeyListener {
     public Client() {
         JLabel lblMessage = new JLabel("Verificar!");
         txtIP = new JTextField("127.0.0.1");
-        txtPorta = new JTextField("12345");
+        txtPorta = new JTextField("25565");
         txtNome = new JTextField("Cliente");
         Object[] texts = {lblMessage, txtIP, txtPorta, txtNome};
         JOptionPane.showMessageDialog(null, texts);
@@ -81,7 +81,9 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         ouw = new OutputStreamWriter(ou);
         bfw = new BufferedWriter(ouw);
         JSONObject json = new JSONObject()
-                .put("nome", txtNome.getText());
+                .put("nome", txtNome.getText())
+                .put("status", "CONECTADO")
+                .put("cartas", "Cartas");
         bfw.write(json.toString());
         bfw.flush();
     }
@@ -91,10 +93,14 @@ public class Client extends JFrame implements ActionListener, KeyListener {
      */
     public void enviarMensagem(String msg) throws IOException {
         if (msg.equals("Sair")) {
-            bfw.write("Desconectado \r\n");
+            JSONObject json = new JSONObject()
+                    .put("status", "Desconectado");
+            bfw.write(json.toString());
             texto.append("Desconectado \r\n");
         } else {
-            bfw.write(msg + "\r\n");
+            JSONObject json = new JSONObject()
+                    .put("msg", msg);
+            bfw.write(json.toString());
             texto.append(txtNome.getText() + " diz -> " + txtMsg.getText() + "\r\n");
         }
         bfw.flush();
@@ -147,7 +153,6 @@ public class Client extends JFrame implements ActionListener, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             try {
                 enviarMensagem(txtMsg.getText());
