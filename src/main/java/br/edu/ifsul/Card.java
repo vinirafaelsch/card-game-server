@@ -9,8 +9,8 @@ public enum Card {
 
     NARUTO(1, "Naruto");
 
-    Integer id;
-    String name;
+    private Integer id;
+    private String name;
 
     Card(Integer id, String name) {
         this.id = id;

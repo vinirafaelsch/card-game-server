@@ -1,5 +1,7 @@
 package br.edu.ifsul;
 
+import org.json.JSONObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -78,7 +80,9 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         ou = socket.getOutputStream();
         ouw = new OutputStreamWriter(ou);
         bfw = new BufferedWriter(ouw);
-        bfw.write(txtNome.getText() + "\r\n");
+        JSONObject json = new JSONObject()
+                .put("nome", txtNome.getText());
+        bfw.write(json.toString());
         bfw.flush();
     }
 

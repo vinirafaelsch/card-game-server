@@ -1,5 +1,8 @@
 package br.edu.ifsul;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
@@ -35,12 +38,19 @@ public class Server extends Thread {
      */
     public void run() {
         try {
-            String msg;
+            String msg = "";
             OutputStream ou = this.con.getOutputStream();
             Writer ouw = new OutputStreamWriter(ou);
             BufferedWriter bfw = new BufferedWriter(ouw);
             clientes.add(bfw);
-            nome = msg = bfr.readLine();
+
+            try {
+                JSONObject jsonObject = new JSONObject(bfr.readLine());
+                nome = jsonObject.getString("nome");
+                msg = jsonObject.getString("msg");
+            } catch (JSONException err) {
+                err.printStackTrace();
+            }
 
             while (!"Sair".equalsIgnoreCase(msg) && msg != null) {
                 msg = bfr.readLine();
@@ -57,7 +67,11 @@ public class Server extends Thread {
     public void sendToAll(BufferedWriter bwSaida, String msg) throws IOException {
         for (BufferedWriter bw : clientes) {
             if (!(bwSaida == bw)) {
-                bw.write(nome + " -> " + msg + "\r\n");
+                JSONObject json = new JSONObject()
+                        .put("nome", nome)
+                        .put("msg", msg);
+
+                bw.write(json.toString());
                 bw.flush();
             }
         }
