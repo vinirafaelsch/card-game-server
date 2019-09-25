@@ -7,14 +7,29 @@ import java.util.Map;
 
 public enum Card {
 
-    NARUTO(1, "Naruto");
+    NARUTO (1, "Naruto", 90, 100, 90),
+    SASUKE (2, "Sasuke", 88, 85, 90),
+    SAKURA (3, "Sakura", 65, 70, 60),
+    BORUTO (4, "Boruto", 50, 80, 65),
+    SARADA (5, "Sarada", 50, 70, 70),
+    MITSUKI (6, "Mitsuki", 55, 75, 75),
 
-    Integer id;
-    String name;
+    ;
 
-    Card(Integer id, String name) {
+
+    private Integer id;
+    private String name;
+    private Integer streght;
+    private Integer stamina;
+    private Integer defense;
+
+
+    Card(Integer id, String name, Integer streght, Integer stamina, Integer defense) {
         this.id = id;
         this.name = name;
+        this.streght = streght;
+        this.stamina = stamina;
+        this.defense = defense;
     }
 
     public Integer getId() {
