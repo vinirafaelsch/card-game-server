@@ -33,7 +33,7 @@ public class Client extends JFrame implements ActionListener, KeyListener {
     public Client() throws IOException {
         JLabel lblMessage = new JLabel("Verificar!");
         txtIP = new JTextField("127.0.0.1");
-        txtPorta = new JTextField("12345");
+        txtPorta = new JTextField("25565");
         txtNome = new JTextField("Cliente");
         Object[] texts = {lblMessage, txtIP, txtPorta, txtNome};
         JOptionPane.showMessageDialog(null, texts);
@@ -77,7 +77,6 @@ public class Client extends JFrame implements ActionListener, KeyListener {
      * @throws IOException
      */
     public void conectar() throws IOException {
-
         socket = new Socket(txtIP.getText(), Integer.parseInt(txtPorta.getText()));
         ou = socket.getOutputStream();
         ouw = new OutputStreamWriter(ou);
@@ -92,12 +91,15 @@ public class Client extends JFrame implements ActionListener, KeyListener {
      * @throws IOException retorna IO Exception caso dê algum erro.
      */
     public void enviarMensagem(String msg) throws IOException {
-
         if (msg.equals("Sair")) {
             bfw.write("Desconectado \r\n");
             texto.append("Desconectado \r\n");
         } else {
-            bfw.write(msg + "\r\n");
+            JSONObject json = new JSONObject()
+                    .put("msg", msg);
+
+            bfw.write(json.toString());
+
             texto.append(txtNome.getText() + " diz -> " + txtMsg.getText() + "\r\n");
         }
         bfw.flush();
@@ -110,20 +112,19 @@ public class Client extends JFrame implements ActionListener, KeyListener {
      * @throws IOException retorna IO Exception caso dê algum erro.
      */
     public void escutar() throws IOException {
-
         InputStream in = socket.getInputStream();
         InputStreamReader inr = new InputStreamReader(in);
         BufferedReader bfr = new BufferedReader(inr);
         String msg = "";
 
         while (!"Sair".equalsIgnoreCase(msg))
-
             if (bfr.ready()) {
                 msg = bfr.readLine();
-                if (msg.equals("Sair"))
+                if (msg.equals("Sair")) {
                     texto.append("Servidor caiu! \r\n");
-                else
+                } else {
                     texto.append(msg + "\r\n");
+                }
             }
     }
 
@@ -132,7 +133,6 @@ public class Client extends JFrame implements ActionListener, KeyListener {
      * @throws IOException retorna IO Exception caso dê algum erro.
      */
     public void sair() throws IOException {
-
         enviarMensagem("Sair");
         bfw.close();
         ouw.close();
@@ -142,7 +142,6 @@ public class Client extends JFrame implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         try {
             if (e.getActionCommand().equals(btnSend.getActionCommand()))
                 enviarMensagem(txtMsg.getText());
@@ -156,7 +155,6 @@ public class Client extends JFrame implements ActionListener, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             try {
                 enviarMensagem(txtMsg.getText());

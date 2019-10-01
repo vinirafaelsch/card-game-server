@@ -8,13 +8,13 @@ import java.util.ArrayList;
 
 public class Server extends Thread {
 
-    private static ArrayList<BufferedWriter> clientes;
-    private static ServerSocket server;
-    private String nome;
     private Socket con;
+    private String nome;
     private InputStream in;
-    private InputStreamReader inr;
     private BufferedReader bfr;
+    private InputStreamReader inr;
+    private static ServerSocket server;
+    private static ArrayList<BufferedWriter> clientes;
 
     /**
      * Método construtor
@@ -34,9 +34,7 @@ public class Server extends Thread {
      * Método run
      */
     public void run() {
-
         try {
-
             String msg;
             OutputStream ou = this.con.getOutputStream();
             Writer ouw = new OutputStreamWriter(ou);
@@ -52,7 +50,6 @@ public class Server extends Thread {
 
         } catch (Exception e) {
             e.printStackTrace();
-
         }
     }
 
@@ -79,17 +76,10 @@ public class Server extends Thread {
      * @param args
      */
     public static void main(String[] args) {
-
         try {
-            //Cria os objetos necessário para instânciar o servidor
-            JLabel lblMessage = new JLabel("Porta do Servidor:");
-            JTextField txtPorta = new JTextField("12345");
-            Object[] texts = {lblMessage, txtPorta};
-            JOptionPane.showMessageDialog(null, texts);
-            server = new ServerSocket(Integer.parseInt(txtPorta.getText()));
-            clientes = new ArrayList<BufferedWriter>();
-            JOptionPane.showMessageDialog(null, "Servidor ativo na porta: " +
-                    txtPorta.getText());
+            Integer porta = 25565;
+            server = new ServerSocket(porta);
+            clientes = new ArrayList<>();
 
             while (true) {
                 System.out.println("Aguardando conexão...");
@@ -98,10 +88,8 @@ public class Server extends Thread {
                 Thread t = new Server(con);
                 t.start();
             }
-
         } catch (Exception e) {
-
             e.printStackTrace();
         }
-    }// Fim do método main
-} //Fim da classe
+    }
+}
