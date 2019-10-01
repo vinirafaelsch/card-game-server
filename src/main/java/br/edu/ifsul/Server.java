@@ -50,7 +50,7 @@ public class Server extends Thread {
                     sendToAll(bfw, msg);
                     System.out.println(msg);
                 } catch (SocketException e) {
-                    break;
+                    continue;
                 }
             }
 

@@ -4,12 +4,10 @@ import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.rmi.server.ExportException;
 
 public class Client extends JFrame implements ActionListener, KeyListener {
 
@@ -32,9 +30,9 @@ public class Client extends JFrame implements ActionListener, KeyListener {
 
     public Client() throws IOException {
         JLabel lblMessage = new JLabel("Verificar!");
-        txtIP = new JTextField("127.0.0.1");
+        txtIP = new JTextField("10.5.10.14");
         txtPorta = new JTextField("25565");
-        txtNome = new JTextField("Cliente");
+        txtNome = new JTextField("Vinin");
         Object[] texts = {lblMessage, txtIP, txtPorta, txtNome};
         JOptionPane.showMessageDialog(null, texts);
         pnlContent = new JPanel();
@@ -70,6 +68,18 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         setSize(250, 300);
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try {
+                    sair();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+
+            }
+        });
     }
 
     /***
@@ -98,7 +108,7 @@ public class Client extends JFrame implements ActionListener, KeyListener {
             JSONObject json = new JSONObject()
                     .put("msg", msg);
 
-            bfw.write(json.toString());
+            bfw.write(json.toString() + "\r\n");
 
             texto.append(txtNome.getText() + " diz -> " + txtMsg.getText() + "\r\n");
         }
@@ -179,5 +189,6 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         Client app = new Client();
         app.conectar();
         app.escutar();
+
     }
 }
