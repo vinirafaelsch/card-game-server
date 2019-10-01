@@ -1,8 +1,6 @@
 package br.edu.ifsul;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,21 +8,24 @@ import java.util.ArrayList;
 
 public class Server extends Thread {
 
-    private Socket con;
-    private String nome;
-    private InputStream in;
-    private BufferedReader bfr;
-    private InputStreamReader inr;
-    private static ServerSocket server;
     private static ArrayList<BufferedWriter> clientes;
+    private static ServerSocket server;
+    private String nome;
+    private Socket con;
+    private InputStream in;
+    private InputStreamReader inr;
+    private BufferedReader bfr;
 
+    /**
+     * Método construtor
+     */
     public Server(Socket con) {
         this.con = con;
         try {
             in = con.getInputStream();
             inr = new InputStreamReader(in);
             bfr = new BufferedReader(inr);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -33,56 +34,62 @@ public class Server extends Thread {
      * Método run
      */
     public void run() {
+
         try {
-            String msg = "";
+
+            String msg;
             OutputStream ou = this.con.getOutputStream();
             Writer ouw = new OutputStreamWriter(ou);
             BufferedWriter bfw = new BufferedWriter(ouw);
             clientes.add(bfw);
-
             nome = msg = bfr.readLine();
-
-//            try {
-//                String jsonString = bfr.readLine();
-//                JSONObject jsonObject = new JSONObject(jsonString); ///bfr
-//                nome = jsonObject.getString("nome");
-//            } catch (JSONException err) {
-//                err.printStackTrace();
-//            }
 
             while (!"Sair".equalsIgnoreCase(msg) && msg != null) {
                 msg = bfr.readLine();
                 sendToAll(bfw, msg);
+                System.out.println(msg);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
+
         }
     }
 
-    /**
+    /***
      * Método usado para enviar mensagem para todos os clients
+     * @param bwSaida do tipo BufferedWriter
+     * @param msg do tipo String
+     * @throws IOException
      */
     public void sendToAll(BufferedWriter bwSaida, String msg) throws IOException {
-        for (BufferedWriter bw : clientes) {
-            if (!(bwSaida == bw)) {
-                JSONObject json = new JSONObject()
-                        .put("nome", nome)
-                        .put("msg", msg);
+        BufferedWriter bwS;
 
-                bw.write(json.toString());
+        for (BufferedWriter bw : clientes) {
+            bwS = (BufferedWriter) bw;
+            if (!(bwSaida == bwS)) {
+                bw.write(nome + " -> " + msg + "\r\n");
                 bw.flush();
             }
         }
     }
 
-    /**
+    /***
      * Método main
+     * @param args
      */
     public static void main(String[] args) {
+
         try {
-            Integer porta = 25565;
-            clientes = new ArrayList<>();
-            server = new ServerSocket(porta);
+            //Cria os objetos necessário para instânciar o servidor
+            JLabel lblMessage = new JLabel("Porta do Servidor:");
+            JTextField txtPorta = new JTextField("12345");
+            Object[] texts = {lblMessage, txtPorta};
+            JOptionPane.showMessageDialog(null, texts);
+            server = new ServerSocket(Integer.parseInt(txtPorta.getText()));
+            clientes = new ArrayList<BufferedWriter>();
+            JOptionPane.showMessageDialog(null, "Servidor ativo na porta: " +
+                    txtPorta.getText());
 
             while (true) {
                 System.out.println("Aguardando conexão...");
@@ -91,8 +98,10 @@ public class Server extends Thread {
                 Thread t = new Server(con);
                 t.start();
             }
+
         } catch (Exception e) {
+
             e.printStackTrace();
         }
-    }
-}
+    }// Fim do método main
+} //Fim da classe
