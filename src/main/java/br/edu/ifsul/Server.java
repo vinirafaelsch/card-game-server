@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.rmi.server.ExportException;
 import java.util.ArrayList;
 
 public class Server extends Thread {
@@ -43,9 +45,13 @@ public class Server extends Thread {
             nome = msg = bfr.readLine();
 
             while (!"Sair".equalsIgnoreCase(msg) && msg != null) {
-                msg = bfr.readLine();
-                sendToAll(bfw, msg);
-                System.out.println(msg);
+                try {
+                    msg = bfr.readLine();
+                    sendToAll(bfw, msg);
+                    System.out.println(msg);
+                } catch (SocketException e) {
+                    break;
+                }
             }
 
         } catch (Exception e) {
