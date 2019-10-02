@@ -1,11 +1,9 @@
 package br.edu.ifsul;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.rmi.server.ExportException;
 import java.util.ArrayList;
 
 public class Server extends Thread {
@@ -45,15 +43,10 @@ public class Server extends Thread {
             nome = msg = bfr.readLine();
 
             while (!"Sair".equalsIgnoreCase(msg) && msg != null) {
-                try {
-                    msg = bfr.readLine();
-                    sendToAll(bfw, msg);
-                    System.out.println(msg);
-                } catch (SocketException e) {
-                    continue;
-                }
+                msg = bfr.readLine();
+                System.out.println(msg);
+                sendToAll(bfw, msg);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -66,14 +59,19 @@ public class Server extends Thread {
      * @throws IOException
      */
     public void sendToAll(BufferedWriter bwSaida, String msg) throws IOException {
-        BufferedWriter bwS;
-
+        BufferedWriter bwToRemove = null;
         for (BufferedWriter bw : clientes) {
-            bwS = (BufferedWriter) bw;
-            if (!(bwSaida == bwS)) {
-                bw.write(nome + " -> " + msg + "\r\n");
-                bw.flush();
+            if (bwSaida != bw) {
+                try {
+                    bw.write(nome + " -> " + msg + "\r\n");
+                    bw.flush();
+                } catch (SocketException se) {
+                    bwToRemove = bw;
+                }
             }
+        }
+        if (bwToRemove != null) {
+            clientes.remove(bwToRemove);
         }
     }
 
