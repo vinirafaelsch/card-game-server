@@ -7,7 +7,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
-import java.rmi.server.ExportException;
 
 public class Client extends JFrame implements ActionListener, KeyListener {
 
@@ -18,23 +17,16 @@ public class Client extends JFrame implements ActionListener, KeyListener {
     private JButton btnSair;
     private JButton btnSend;
     private OutputStream ou;
-    private JTextField txtIP;
     private JPanel pnlContent;
     private JTextField txtMsg;
     private BufferedWriter bfw;
-    private JTextField txtNome;
     private JLabel lblHistorico;
-    private JTextField txtPorta;
 
-    private static final long serialVersionUID = 1L;
+    private String ip = "127.0.0.1";
+    private String nome = "Vinin";
+    private Integer porta = 25565;
 
-    public Client() throws IOException {
-        JLabel lblMessage = new JLabel("Verificar!");
-        txtIP = new JTextField("10.5.10.14");
-        txtPorta = new JTextField("25565");
-        txtNome = new JTextField("Vinin");
-        Object[] texts = {lblMessage, txtIP, txtPorta, txtNome};
-        JOptionPane.showMessageDialog(null, texts);
+    public Client() {
         pnlContent = new JPanel();
         texto = new JTextArea(10, 20);
         texto.setEditable(false);
@@ -61,7 +53,7 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         pnlContent.setBackground(Color.LIGHT_GRAY);
         texto.setBorder(BorderFactory.createEtchedBorder(Color.BLUE, Color.BLUE));
         txtMsg.setBorder(BorderFactory.createEtchedBorder(Color.BLUE, Color.BLUE));
-        setTitle(txtNome.getText());
+        setTitle(this.nome);
         setContentPane(pnlContent);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -69,6 +61,9 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+        /**
+         * Listener para quando o usuario fechar o JFrame na marra...
+         */
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -77,22 +72,25 @@ public class Client extends JFrame implements ActionListener, KeyListener {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
-
             }
         });
     }
 
-    /***
+    /**
      * Método usado para conectar no server socket, retorna IO Exception caso dê algum erro.
      * @throws IOException
      */
     public void conectar() throws IOException {
-        socket = new Socket(txtIP.getText(), Integer.parseInt(txtPorta.getText()));
+        socket = new Socket(this.ip, this.porta);
         ou = socket.getOutputStream();
         ouw = new OutputStreamWriter(ou);
         bfw = new BufferedWriter(ouw);
-        bfw.write(txtNome.getText() + "\r\n");
-        bfw.flush();
+
+        /**
+         * O nome sera passado no mesmo json da msg
+         */
+//        bfw.write(this.nome + "\r\n");
+//        bfw.flush();
     }
 
     /***
@@ -106,11 +104,11 @@ public class Client extends JFrame implements ActionListener, KeyListener {
             texto.append("Desconectado \r\n");
         } else {
             JSONObject json = new JSONObject()
+                   .put("nome", nome)
                     .put("msg", msg);
 
             bfw.write(json.toString() + "\r\n");
-
-            texto.append(txtNome.getText() + " diz -> " + txtMsg.getText() + "\r\n");
+            texto.append(this.nome + " diz -> " + txtMsg.getText() + "\r\n");
         }
         bfw.flush();
         txtMsg.setText("");
@@ -153,12 +151,12 @@ public class Client extends JFrame implements ActionListener, KeyListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            if (e.getActionCommand().equals(btnSend.getActionCommand()))
+            if (e.getActionCommand().equals(btnSend.getActionCommand())) {
                 enviarMensagem(txtMsg.getText());
-            else if (e.getActionCommand().equals(btnSair.getActionCommand()))
+            } else if (e.getActionCommand().equals(btnSair.getActionCommand())) {
                 sair();
+            }
         } catch (IOException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
     }
@@ -169,7 +167,6 @@ public class Client extends JFrame implements ActionListener, KeyListener {
             try {
                 enviarMensagem(txtMsg.getText());
             } catch (IOException e1) {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
         }
@@ -189,6 +186,5 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         Client app = new Client();
         app.conectar();
         app.escutar();
-
     }
 }

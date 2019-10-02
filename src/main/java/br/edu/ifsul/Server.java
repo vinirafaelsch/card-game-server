@@ -9,7 +9,6 @@ import java.util.ArrayList;
 public class Server extends Thread {
 
     private Socket con;
-    private String nome;
     private InputStream in;
     private BufferedReader bfr;
     private InputStreamReader inr;
@@ -35,14 +34,13 @@ public class Server extends Thread {
      */
     public void run() {
         try {
-            String msg;
+            String msg = "";
             OutputStream ou = this.con.getOutputStream();
             Writer ouw = new OutputStreamWriter(ou);
             BufferedWriter bfw = new BufferedWriter(ouw);
             clientes.add(bfw);
-            nome = msg = bfr.readLine();
 
-            while (!"Sair".equalsIgnoreCase(msg) && msg != null) {
+            while (msg != null && !msg.equalsIgnoreCase("sair")) {
                 msg = bfr.readLine();
                 System.out.println(msg);
                 sendToAll(bfw, msg);
@@ -52,7 +50,7 @@ public class Server extends Thread {
         }
     }
 
-    /***
+    /**
      * Método usado para enviar mensagem para todos os clients
      * @param bwSaida do tipo BufferedWriter
      * @param msg do tipo String
@@ -62,6 +60,17 @@ public class Server extends Thread {
         BufferedWriter bwToRemove = null;
         for (BufferedWriter bw : clientes) {
             if (bwSaida != bw) {
+                String nome = "temp"; // Pegar nome do json
+                /// Precisa fazer o parse do json ainda
+
+                /**
+                 try {
+                 JSONObject json = new JSONObject(msg);
+                 } catch (JSONException err) {
+                 err.printStackTrace();
+                 }
+                 */
+
                 try {
                     bw.write(nome + " -> " + msg + "\r\n");
                     bw.flush();
@@ -75,7 +84,7 @@ public class Server extends Thread {
         }
     }
 
-    /***
+    /**
      * Método main
      * @param args
      */
