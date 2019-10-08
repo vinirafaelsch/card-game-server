@@ -23,7 +23,7 @@ public class Client extends JFrame implements ActionListener, KeyListener {
     private JLabel lblHistorico;
 
     private String ip = "127.0.0.1";
-    private String nome = "Vinin";
+    private String nome = "Jorgin";
     private Integer porta = 25565;
 
     public Client() {
@@ -78,6 +78,7 @@ public class Client extends JFrame implements ActionListener, KeyListener {
 
     /**
      * Método usado para conectar no server socket, retorna IO Exception caso dê algum erro.
+     *
      * @throws IOException
      */
     public void conectar() throws IOException {
@@ -85,16 +86,11 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         ou = socket.getOutputStream();
         ouw = new OutputStreamWriter(ou);
         bfw = new BufferedWriter(ouw);
-
-        /**
-         * O nome sera passado no mesmo json da msg
-         */
-//        bfw.write(this.nome + "\r\n");
-//        bfw.flush();
     }
 
-    /***
+    /**
      * Método usado para enviar mensagem para o server socket
+     *
      * @param msg do tipo String
      * @throws IOException retorna IO Exception caso dê algum erro.
      */
@@ -104,11 +100,11 @@ public class Client extends JFrame implements ActionListener, KeyListener {
             texto.append("Desconectado \r\n");
         } else {
             JSONObject json = new JSONObject()
-                   .put("nome", nome)
+                    .put("nome", nome)
                     .put("msg", msg);
 
             bfw.write(json.toString() + "\r\n");
-            texto.append(this.nome + " diz -> " + txtMsg.getText() + "\r\n");
+            texto.append(this.nome + ": " + txtMsg.getText() + "\r\n");
         }
         bfw.flush();
         txtMsg.setText("");
@@ -136,8 +132,9 @@ public class Client extends JFrame implements ActionListener, KeyListener {
             }
     }
 
-    /***
+    /**
      * Método usado quando o usuário clica em sair
+     *
      * @throws IOException retorna IO Exception caso dê algum erro.
      */
     public void sair() throws IOException {

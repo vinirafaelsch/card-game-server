@@ -1,5 +1,8 @@
 package br.edu.ifsul;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -52,27 +55,28 @@ public class Server extends Thread {
 
     /**
      * Método usado para enviar mensagem para todos os clients
+     *
      * @param bwSaida do tipo BufferedWriter
-     * @param msg do tipo String
+     * @param msg     do tipo String
      * @throws IOException
      */
     public void sendToAll(BufferedWriter bwSaida, String msg) throws IOException {
         BufferedWriter bwToRemove = null;
         for (BufferedWriter bw : clientes) {
             if (bwSaida != bw) {
-                String nome = "temp"; // Pegar nome do json
-                /// Precisa fazer o parse do json ainda
-
-                /**
-                 try {
-                 JSONObject json = new JSONObject(msg);
-                 } catch (JSONException err) {
-                 err.printStackTrace();
-                 }
-                 */
+                String nome = "temp";
+                String message = "temp";
 
                 try {
-                    bw.write(nome + " -> " + msg + "\r\n");
+                    JSONObject json = new JSONObject(msg);
+                    nome = json.getString("nome");
+                    message = json.getString("msg");
+                } catch (JSONException err) {
+                    err.printStackTrace();
+                }
+
+                try {
+                    bw.write(nome + ": " + message + "\r\n");
                     bw.flush();
                 } catch (SocketException se) {
                     bwToRemove = bw;
@@ -86,6 +90,7 @@ public class Server extends Thread {
 
     /**
      * Método main
+     *
      * @param args
      */
     public static void main(String[] args) {
