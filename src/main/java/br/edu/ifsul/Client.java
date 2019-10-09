@@ -123,8 +123,9 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         BufferedReader bfr = new BufferedReader(inr);
 
         String msg = bfr.readLine();
+        String result = "";
         String name = "";
-        String streght = "";
+        String strength = "";
         String defense = "";
         String stamina = "";
 
@@ -135,11 +136,11 @@ public class Client extends JFrame implements ActionListener, KeyListener {
             this.card = Card.getByName(cardName);
 
             name = json.getString("name");
-            streght = json.getString("streght");
+            strength = json.getString("strength");
             defense = json.getString("defense");
             stamina = json.getString("stamina");
             texto.append(name + "\r\n");
-            texto.append(streght + "\r\n");
+            texto.append(strength + "\r\n");
             texto.append(defense + "\r\n");
             texto.append(stamina + "\r\n");
         } catch (JSONException err) {
@@ -152,7 +153,28 @@ public class Client extends JFrame implements ActionListener, KeyListener {
                 if (msg.equals("Sair")) {
                     texto.append("Servidor caiu! \r\n");
                 } else {
-                    texto.append(msg + "\r\n");
+                    try {
+                        JSONObject json = new JSONObject(msg);
+
+                        String cardName = json.getString("card");
+                        this.card = Card.getByName(cardName);
+
+                        msg = json.getString("msg");
+                        name = json.getString("name");
+                        strength = json.getString("strength");
+                        defense = json.getString("defense");
+                        stamina = json.getString("stamina");
+                        result = json.getString("resultado");
+
+                        texto.append(msg + "\r\n");
+                        texto.append(result + "\r\n");
+                        texto.append(name + "\r\n");
+                        texto.append(strength + "\r\n");
+                        texto.append(defense + "\r\n");
+                        texto.append(stamina + "\r\n");
+                    } catch (JSONException err) {
+                        err.printStackTrace();
+                    }
                 }
             }
     }
