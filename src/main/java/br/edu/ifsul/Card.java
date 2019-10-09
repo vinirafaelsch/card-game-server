@@ -1,9 +1,6 @@
 package br.edu.ifsul;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public enum Card {
@@ -43,17 +40,31 @@ public enum Card {
         this.strength = strength;
     }
 
-    public Integer getId() { return id; }
-    public String getName() { return name; }
-    public Integer getStamina() { return stamina; }
-    public Integer getDefense() { return defense; }
-    public Integer getStrength() { return strength; }
+    public Integer getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Integer getStamina() {
+        return stamina;
+    }
+
+    public Integer getDefense() {
+        return defense;
+    }
+
+    public Integer getStrength() {
+        return strength;
+    }
 
     private static final Map<Integer, Card> lookup = Collections.synchronizedMap(new HashMap<>());
 
     static {
         EnumSet.allOf(Card.class).forEach(
-               card -> lookup.put(card.getId(), card)
+                card -> lookup.put(card.getId(), card)
         );
     }
 
@@ -65,12 +76,27 @@ public enum Card {
         return returnMap;
     }
 
+    public static List<Card> getEnumList() {
+        List<Card> cards = new ArrayList<>();
+        for (Card card : EnumSet.allOf(Card.class)) {
+            cards.add(card);
+        }
+        return cards;
+    }
+
+    public static Card getRandomCard() {
+        Random rand = new Random();
+        List<Card> cards = getEnumList();
+        return cards.get(rand.nextInt(cards.size()));
+    }
+
     public static Card getById(Integer id) {
-        return (lookup.containsKey(id)) ? lookup.get(id) : null;
+        if (!lookup.containsKey(id)) return null;
+        return lookup.get(id);
     }
 
     public static Card getByName(String name) {
-        return (lookup.containsValue(name)) ? lookup.get(name) : null;
+        return Card.valueOf(name);
     }
 }
 
