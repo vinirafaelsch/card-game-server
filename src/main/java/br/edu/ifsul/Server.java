@@ -1,5 +1,6 @@
 package br.edu.ifsul;
 
+import com.sun.net.httpserver.HttpServer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,7 +51,10 @@ public class Server extends Thread {
 
             JSONObject jsonObject = new JSONObject()
                     .put("card", random)
-                    .put("info", "A sua carta é " + random.getName());
+                    .put("name", " A sua carta é " + random.getName())
+                    .put("streght", "   [1] Força: " + random.getStrength())
+                    .put("defense", "   [2] Defesa: " + random.getDefense())
+                    .put("stamina", "   [3] Stamina: " + random.getStamina());
 
             bfw.write(jsonObject.toString() + "\r\n");
             bfw.flush();
@@ -97,7 +101,7 @@ public class Server extends Thread {
             res = clientCard.getDefense() > serverCard.getDefense();
         }
 
-        bfw.write("a carta do servidor era " + serverCard.getName() + "\r\n");
+        bfw.write("\nA carta do servidor era " + serverCard.getName() + "\r\n");
 
         if (res) {
             bfw.write("ganhou" + "\r\n");
