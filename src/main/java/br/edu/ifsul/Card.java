@@ -91,11 +91,12 @@ public enum Card {
     }
 
     public static Card getById(Integer id) {
-        return (lookup.containsKey(id)) ? lookup.get(id) : null;
+        if (!lookup.containsKey(id)) return null;
+        return lookup.get(id);
     }
 
     public static Card getByName(String name) {
-        return (lookup.containsValue(name)) ? lookup.get(name) : null;
+        return Card.valueOf(name);
     }
 }
 

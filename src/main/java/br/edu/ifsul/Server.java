@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Server extends Thread {
 
@@ -43,14 +44,68 @@ public class Server extends Thread {
             BufferedWriter bfw = new BufferedWriter(ouw);
             clientes.add(bfw);
 
+            Card random = Card.getRandomCard();
+            List<Card> deck = Card.getEnumList();
+            deck.remove(random);
+
+            JSONObject jsonObject = new JSONObject()
+                    .put("card", random)
+                    .put("info", "A sua carta é " + random.getName());
+
+            bfw.write(jsonObject.toString() + "\r\n");
+            bfw.flush();
+
             while (msg != null && !msg.equalsIgnoreCase("sair")) {
                 msg = bfr.readLine();
-                System.out.println(msg);
-                sendToAll(bfw, msg);
+                sentToOne(bfw, msg);
+                /** sendToAll(bfw, msg); */
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void sentToOne(BufferedWriter bfw, String msg) throws IOException {
+        String nome = "temp", message = "temp";
+        Opcao opcao = Opcao.STRENGTH;
+        Card clientCard = Card.BORUTO;
+
+        try {
+            JSONObject json = new JSONObject(msg);
+            nome = json.getString("nome");
+            opcao = Opcao.getById(Integer.valueOf(json.getString("msg")));
+            clientCard = Card.getByName(json.getString("card"));
+        } catch (JSONException err) {
+            err.printStackTrace();
+        }
+
+        Card serverCard = Card.BORUTO; /** Inicia como boruto so pra nao da erro */
+
+        do {
+            /**
+             * Sempre pegar uma carta diferente da do cliente
+             */
+            serverCard = Card.getRandomCard();
+        } while (serverCard.equals(clientCard));
+
+        boolean res = false;
+        if (opcao.equals(Opcao.STRENGTH)) {
+            res = clientCard.getStrength() > serverCard.getStrength();
+        } else if (opcao.equals(Opcao.STAMINA)) {
+            res = clientCard.getStamina() > serverCard.getStamina();
+        } else if (opcao.equals(Opcao.DEFENSE)) {
+            res = clientCard.getDefense() > serverCard.getDefense();
+        }
+
+        bfw.write("a carta do servidor era " + serverCard.getName() + "\r\n");
+
+        if (res) {
+            bfw.write("ganhou" + "\r\n");
+        } else {
+            bfw.write("perdeu" + "\r\n");
+        }
+
+        bfw.flush();
     }
 
     /**

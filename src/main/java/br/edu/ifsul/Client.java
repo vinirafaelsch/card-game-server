@@ -1,5 +1,6 @@
 package br.edu.ifsul;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.swing.*;
@@ -25,6 +26,8 @@ public class Client extends JFrame implements ActionListener, KeyListener {
     private String ip = "127.0.0.1";
     private String nome = "Jorgin";
     private Integer porta = 25565;
+
+    private Card card;
 
     public Client() {
         pnlContent = new JPanel();
@@ -97,14 +100,13 @@ public class Client extends JFrame implements ActionListener, KeyListener {
     public void enviarMensagem(String msg) throws IOException {
         if (msg.equals("Sair")) {
             bfw.write("Desconectado \r\n");
-            texto.append("Desconectado \r\n");
         } else {
             JSONObject json = new JSONObject()
                     .put("nome", nome)
+                    .put("card", this.card)
                     .put("msg", msg);
 
             bfw.write(json.toString() + "\r\n");
-            texto.append(this.nome + ": " + txtMsg.getText() + "\r\n");
         }
         bfw.flush();
         txtMsg.setText("");
@@ -119,7 +121,21 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         InputStream in = socket.getInputStream();
         InputStreamReader inr = new InputStreamReader(in);
         BufferedReader bfr = new BufferedReader(inr);
-        String msg = "";
+
+        String msg = bfr.readLine();
+        String info = "";
+
+        try {
+            JSONObject json = new JSONObject(msg);
+
+            String cardName = json.getString("card");
+            this.card = Card.getByName(cardName);
+
+            info = json.getString("info");
+            texto.append(info + "\r\n");
+        } catch (JSONException err) {
+            err.printStackTrace();
+        }
 
         while (!"Sair".equalsIgnoreCase(msg))
             if (bfr.ready()) {
