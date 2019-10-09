@@ -123,7 +123,10 @@ public class Client extends JFrame implements ActionListener, KeyListener {
         BufferedReader bfr = new BufferedReader(inr);
 
         String msg = bfr.readLine();
-        String info = "";
+        String name = "";
+        String streght = "";
+        String defense = "";
+        String stamina = "";
 
         try {
             JSONObject json = new JSONObject(msg);
@@ -131,8 +134,14 @@ public class Client extends JFrame implements ActionListener, KeyListener {
             String cardName = json.getString("card");
             this.card = Card.getByName(cardName);
 
-            info = json.getString("info");
-            texto.append(info + "\r\n");
+            name = json.getString("name");
+            streght = json.getString("streght");
+            defense = json.getString("defense");
+            stamina = json.getString("stamina");
+            texto.append(name + "\r\n");
+            texto.append(streght + "\r\n");
+            texto.append(defense + "\r\n");
+            texto.append(stamina + "\r\n");
         } catch (JSONException err) {
             err.printStackTrace();
         }
