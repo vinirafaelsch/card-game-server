@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Server extends Thread {
 
@@ -19,6 +20,8 @@ public class Server extends Thread {
     private InputStreamReader inr;
     private static ServerSocket server;
     private static ArrayList<BufferedWriter> clientes;
+    private List<Card> deckClient = new ArrayList<>();
+    private List<Card> deckServer = new ArrayList<>();
 
     /**
      * Método construtor
@@ -45,14 +48,18 @@ public class Server extends Thread {
             BufferedWriter bfw = new BufferedWriter(ouw);
             clientes.add(bfw);
 
-            Card random = Card.getRandomCard();
-            List<Card> deck = Card.getEnumList();
-            deck.remove(random);
+            for(int i = 1; i <= 10; i++) {
+                this.deckClient.add(Card.getRandomCard());
+                this.deckServer.add(Card.getRandomCard());
+            }
+
+            Card random = this.deckClient.get(0);
+            this.deckClient.remove(random);
 
             JSONObject jsonObject = new JSONObject()
                     .put("card", random)
                     .put("name", " A sua carta é " + random.getName())
-                    .put("streght", "   [1] Força: " + random.getStrength())
+                    .put("strength", "   [1] Força: " + random.getStrength())
                     .put("defense", "   [2] Defesa: " + random.getDefense())
                     .put("stamina", "   [3] Stamina: " + random.getStamina());
 
@@ -83,32 +90,43 @@ public class Server extends Thread {
             err.printStackTrace();
         }
 
-        Card serverCard = Card.BORUTO; /** Inicia como boruto so pra nao da erro */
-
-        do {
-            /**
-             * Sempre pegar uma carta diferente da do cliente
-             */
-            serverCard = Card.getRandomCard();
-        } while (serverCard.equals(clientCard));
-
-        boolean res = false;
+        Card serverCard = this.deckServer.get(0);
+        Integer value = null;
+        Boolean res = false;
         if (opcao.equals(Opcao.STRENGTH)) {
             res = clientCard.getStrength() > serverCard.getStrength();
+            value = serverCard.getStrength();
         } else if (opcao.equals(Opcao.STAMINA)) {
             res = clientCard.getStamina() > serverCard.getStamina();
+            value = serverCard.getStamina();
         } else if (opcao.equals(Opcao.DEFENSE)) {
             res = clientCard.getDefense() > serverCard.getDefense();
+            value = serverCard.getDefense();
         }
 
-        bfw.write("\nA carta do servidor era " + serverCard.getName() + "\r\n");
+        JSONObject jsonObject = new JSONObject();
 
         if (res) {
-            bfw.write("ganhou" + "\r\n");
+            this.deckClient.add(serverCard);
+            this.deckServer.remove(serverCard);
+            jsonObject.put("resultado", "ganhou");
         } else {
-            bfw.write("perdeu" + "\r\n");
+            this.deckServer.add(clientCard);
+            jsonObject.put("resultado", "perdeu");
         }
 
+        Card cardClient = this.deckClient.get(0);
+        this.deckClient.remove(cardClient);
+
+        jsonObject.put("msg", "\nA carta do servidor era " + serverCard.getName() +
+                "\nO atributo " + opcao.getName() + " da carta do servidor é: " + value);
+        jsonObject.put("name", cardClient.getName());
+        jsonObject.put("strength", "   [1] Força: " + cardClient.getStrength());
+        jsonObject.put("defense", "   [2] Defesa: " + cardClient.getDefense());
+        jsonObject.put("stamina", "   [3] Stamina: " + cardClient.getStamina());
+        jsonObject.put("card", cardClient);
+
+        bfw.write(jsonObject.toString() + "\r\n");
         bfw.flush();
     }
 
